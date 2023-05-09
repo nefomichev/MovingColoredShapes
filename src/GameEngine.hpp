@@ -8,11 +8,96 @@
 using uint = unsigned int;
 
 class Engine
+
 {
+public:
+    std::shared_ptr<sf::RenderWindow> gameWindow;
+
+public:
+    explicit Engine(const std::string& configFileName)
+    {
+        loadFromFile(configFileName);
+    }
+
+    void loadFromFile(const std::string& filename)
+    {
+        std::string option_name;
+        std::ifstream fin = readConfigFromFile(filename);
+
+        while (fin >> option_name)
+        {
+            if (option_name == "Window")
+            {
+                parseWindowSettings(fin);
+            }
+
+            if (option_name == "Font")
+            {
+                parseFont(fin);
+                parseFontSettings(fin);
+            }
+
+            if (m_shapeCreationFunctions.count(option_name) > 0)
+            {
+                parseAndLoadShape(fin, option_name);
+            }
+        }
+    };
+
+    void renderFrame()
+    {
+        for (auto& shape : m_movingColorShapes)
+        {
+            gameWindow->draw(*shape.getShape());
+            gameWindow->draw(*shape.getShapeText());
+        }
+        gameWindow->display();
+        gameWindow->clear();
+    }
+
+    void updateFrame()
+    {
+        for (auto &shape: m_movingColorShapes)
+        {
+            shape.windowBounce({m_windowWidth, m_windowHeight});
+            shape.move();
+        }
+    }
+
+    void createGameWindow()
+    {
+        gameWindow = std::make_shared<sf::RenderWindow>(
+                sf::VideoMode(m_windowWidth, m_windowHeight),
+                "MovingColoredShapes");
+        gameWindow->setFramerateLimit(60);
+    }
+
+    void lookForEvents() const
+    {
+        sf::Event event{};
+        while (gameWindow->pollEvent(event))
+        {
+            if (event.type == sf::Event::Closed)
+            {
+                gameWindow->close();
+            }
+        }
+    }
+private:
     using  ShapeLoaderFunction = std::function<std::shared_ptr<sf::Shape>(std::ifstream&)>;
 
+    uint m_windowWidth{};
+    uint m_windowHeight{};
+    sf::Font m_textFont{};
+    sf::Text  m_WindowDefaultText{};
+    std::vector<MovingColoredShapeWithText> m_movingColorShapes{};
+    std::map<std::string, ShapeLoaderFunction> m_shapeCreationFunctions = {
+            {"Circle",    loadCircle},
+            {"Rectangle", loadRectangle}
+    };
+
+private:
     static std::shared_ptr<sf::Shape> loadCircle(std::ifstream& fin)
-    // ShapeLoaderFunction
     {
         float radius;
         fin >> radius;
@@ -20,7 +105,6 @@ class Engine
     }
 
     static std::shared_ptr<sf::Shape> loadRectangle(std::ifstream& fin)
-    // ShapeLoaderFunction
     {
         float width;
         float height;
@@ -28,21 +112,10 @@ class Engine
         return std::make_shared<sf::RectangleShape>(sf::Vector2f(height, width));
     }
 
-    uint m_windowWidth{};
-    uint m_windowHeight{};
-    sf::Font m_textFont;
-    sf::Text  m_WindowDefaultText;
-    std::vector<MovingColoredShapeWithText> m_movingColorShapes{};
-    std::map<std::string, ShapeLoaderFunction> m_shapeCreationFunctions = {
-            {"Circle",    loadCircle},
-            {"Rectangle", loadRectangle}
-    };
-
-
     void parseWindowSettings(std::ifstream& fin)
     {
         fin >> m_windowWidth >> m_windowHeight;
-    };
+    }
 
     void parseFont(std::ifstream& fin)
     {
@@ -113,7 +186,7 @@ class Engine
         return std::make_shared<sf::Text>(shapeText);
     }
 
-    static auto readConfigFromFile(const std::string& filename)
+    static std::ifstream readConfigFromFile(const std::string& filename)
     {
         std::ifstream fin(filename);
 
@@ -126,78 +199,5 @@ class Engine
             return fin;
         }
     }
-public:
-    std::shared_ptr<sf::RenderWindow> gameWindow;
-
-    explicit Engine(const std::string& configFileName)
-    {
-        loadFromFile(configFileName);
-    }
-
-    void loadFromFile(const std::string& filename)
-    {
-        std::string option_name;
-        std::ifstream fin = readConfigFromFile(filename);
-
-        while (fin >> option_name)
-        {
-            if (option_name == "Window")
-            {
-                parseWindowSettings(fin);
-            }
-
-            if (option_name == "Font")
-            {
-                parseFont(fin);
-                parseFontSettings(fin);
-            }
-
-            if (m_shapeCreationFunctions.count(option_name) > 0)
-            {
-                parseAndLoadShape(fin, option_name);
-            }
-        }
-    };
-
-    void renderFrame()
-    {
-        for (auto& shape : m_movingColorShapes)
-        {
-            gameWindow->draw(*shape.getShape());
-            gameWindow->draw(*shape.getShapeText());
-        }
-        gameWindow->display();
-        gameWindow->clear();
-    }
-
-    void updateFrame()
-    {
-        for (auto &shape: m_movingColorShapes)
-        {
-            shape.windowBounce({m_windowWidth, m_windowHeight});
-            shape.move();
-        }
-    }
-
-    void createGameWindow()
-    {
-        gameWindow = std::make_shared<sf::RenderWindow>(
-                sf::VideoMode(m_windowWidth, m_windowHeight),
-                "MovingColoredShapes");
-        gameWindow->setFramerateLimit(60);
-    }
-
-    void lookForEvents() const
-    {
-        sf::Event event{};
-        while (gameWindow->pollEvent(event))
-        {
-            if (event.type == sf::Event::Closed)
-            {
-                gameWindow->close();
-            }
-        }
-    }
-
 };
 #endif //MOVINGSHAPES_GAMEENGINE_HPP

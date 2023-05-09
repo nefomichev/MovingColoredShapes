@@ -8,7 +8,6 @@ int main()
 
     while (engine.gameWindow->isOpen())
     {
-
         engine.lookForEvents();
         engine.renderFrame();
         engine.updateFrame();

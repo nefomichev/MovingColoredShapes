@@ -6,13 +6,13 @@
 class MovingColoredShapeWithText
 {
 public:
-    MovingColoredShapeWithText(std::shared_ptr<sf::Shape>& shape,
-                               std::shared_ptr<sf::Text>& shapeText,
+    MovingColoredShapeWithText(std::shared_ptr<sf::Shape> shape,
+                               std::shared_ptr<sf::Text> shapeText,
                                sf::Color parsedShapeColor,
                                sf::Vector2f shapeInitPos,
                                sf::Vector2f shapeInitSpeed)
-            : m_shape(std::move(shape)),
-              m_shapeText(std::move(shapeText)),
+            : m_shape(shape),
+              m_shapeText(shapeText),
               m_shapeSpeed(shapeInitSpeed)
     {
         setInitShapePosition(shapeInitPos);

@@ -1,6 +1,8 @@
+# IDEs
+.idea/
+.vscode/
 # Prerequisites
 *.d
-
 # Compiled Object files
 *.slo
 *.lo
@@ -33,7 +35,6 @@
 
 
 .DS_store
-.idea/
 cmake-build-debug/
 cmake-build-debug-coverage/
 .ccls-cache/

@@ -1,6 +1,8 @@
 #include "MovingColoredShapeWithText.hpp"
 #include "fstream"
 #include "iostream"
+#include "map"
+#include "functional"
 
 #ifndef MOVINGSHAPES_GAMEENGINE_HPP
 #define MOVINGSHAPES_GAMEENGINE_HPP

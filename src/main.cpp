@@ -2,13 +2,13 @@
 #include "MovingColoredShapeWithText.hpp"
 
 int main() {
-  auto engine = Engine("../config.txt");
+  auto engine = Engine("../../../config.txt");
   engine.createGameWindow();
 
   while (engine.gameWindow->isOpen()) {
     engine.lookForEvents();
-    engine.renderFrame();
     engine.updateFrame();
+    engine.renderFrame();
   }
   return 0;
 }

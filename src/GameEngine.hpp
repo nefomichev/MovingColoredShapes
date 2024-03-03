@@ -3,6 +3,10 @@
 #include "iostream"
 #include "map"
 #include "functional"
+#include <SFML/System/Clock.hpp>
+
+#include <imgui-SFML.h>
+#include <imgui.h>
 
 #ifndef MOVINGSHAPES_GAMEENGINE_HPP
 #define MOVINGSHAPES_GAMEENGINE_HPP
@@ -14,6 +18,7 @@ class Engine
 {
 public:
   std::shared_ptr<sf::RenderWindow> gameWindow;
+  sf::Clock deltaClock;
 
 public:
   explicit Engine(const std::string &configFileName) {
@@ -41,12 +46,13 @@ public:
   };
 
   void renderFrame() {
+    gameWindow->clear();
     for (auto &shape : m_movingColorShapes) {
       gameWindow->draw(*shape.getShape());
       gameWindow->draw(*shape.getShapeText());
     }
+    ImGui::SFML::Render(*gameWindow);
     gameWindow->display();
-    gameWindow->clear();
   }
 
   void updateFrame() {
@@ -54,17 +60,21 @@ public:
       shape.windowBounce({m_windowWidth, m_windowHeight});
       shape.move();
     }
+    ImGui::SFML::Update(*gameWindow, deltaClock.restart());
+    ImGui::ShowDemoWindow();
   }
 
   void createGameWindow() {
     gameWindow = std::make_shared<sf::RenderWindow>(
         sf::VideoMode(m_windowWidth, m_windowHeight), "MovingColoredShapes");
     gameWindow->setFramerateLimit(60);
+    ImGui::SFML::Init(*gameWindow);
   }
 
   void lookForEvents() const {
     sf::Event event{};
     while (gameWindow->pollEvent(event)) {
+      ImGui::SFML::ProcessEvent(event);
       if (event.type == sf::Event::Closed) {
         gameWindow->close();
       }
